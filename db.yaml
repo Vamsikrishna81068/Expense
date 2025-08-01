@@ -24,12 +24,13 @@
      name: python3-pip
      state: present
      update_cache: yes
-  - name: install python mysql dependencies
+  - name: Install PyMySQL and cryptography with --break-system-packages
     ansible.builtin.pip:
-      name:
+    name:
       - PyMySQL
       - cryptography
-      executable: pip3 # pip3.11 if python version is 3.11
+    executable: pip3
+    extra_args: --break-system-packages
 
   # check password is already setup or not
   - name: check DB connection
