@@ -26,7 +26,7 @@
      update_cache: yes
   - name: Install PyMySQL and cryptography with --break-system-packages
     ansible.builtin.pip:
-    name:
+     name:
       - PyMySQL
       - cryptography
     executable: pip3
