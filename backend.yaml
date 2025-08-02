@@ -1,31 +1,43 @@
 - name: Configure backend server
   become: yes
   hosts: db
+
   vars:
     login_host: 172.31.89.171
     login_password: ExpenseApp@1
 
   tasks:
-    - name: Ensure required APT packages are present
+
+    - name: Add NodeSource APT repository for Node.js
+      ansible.builtin.apt_key:
+        url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+        state: present
+
+    - name: Add Node.js 18.x repo
+      ansible.builtin.apt_repository:
+        repo: deb https://deb.nodesource.com/node_18.x nodistro main
+        state: present
+        filename: nodesource
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install required packages
       ansible.builtin.apt:
         name:
           - nodejs
-          - npm
           - unzip
-          - python3-pip
+          - python3-pymysql
+          - python3-cryptography
         state: present
-        update_cache: yes
-
-    - name: Install PyMySQL and cryptography via pip
-      ansible.builtin.command:
-        cmd: pip3 install PyMySQL cryptography --break-system-packages
-      ignore_errors: true
 
     - name: Create expense user
       ansible.builtin.user:
         name: expense
+        state: present
 
-    - name: Create app directory
+    - name: Create /app directory
       ansible.builtin.file:
         path: /app
         state: directory
@@ -51,25 +63,26 @@
       args:
         chdir: /app
       environment:
-        HOME: /root
+        HOME: /home/expense
 
     - name: Copy backend service file
       ansible.builtin.copy:
         src: backend.service
         dest: /etc/systemd/system/backend.service
+        mode: '0644'
 
-    - name: Import data into mysql
+    - name: Import MySQL schema
       community.mysql.mysql_db:
         login_user: root
         login_password: "{{ login_password }}"
         login_host: "{{ login_host }}"
-        target: /app/schema/backend.sql
-        state: import
         name: all
+        state: import
+        target: /app/schema/backend.sql
 
-    - name: Daemon reload
-      ansible.builtin.systemd_service:
-        daemon_reload: true
+    - name: Reload systemd daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes
 
     - name: Start and enable backend service
       ansible.builtin.service:
