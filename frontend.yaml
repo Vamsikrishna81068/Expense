@@ -1,55 +1,59 @@
 - name: configure frontend server
+  hosts: frontend
   become: yes
-  hosts: db
 
   tasks:
-    - name: install nginx server
+
+    - name: Install nginx
       ansible.builtin.apt:
         name: nginx
         state: latest
         update_cache: yes
 
-    - name: start and enable nginx
+    - name: Ensure Nginx is stopped before config
       ansible.builtin.service:
         name: nginx
-        state: started
-        enabled: yes
+        state: stopped
+        enabled: false
 
-    - name: delete default website
+    - name: Remove default site config
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+        force: yes
+
+    - name: Remove default html
       ansible.builtin.file:
         path: /usr/share/nginx/html
         state: absent
 
-    - name: create html directory
+    - name: Create html directory
       ansible.builtin.file:
         path: /usr/share/nginx/html
         state: directory
 
-    - name: download and extract frontend code
+    - name: Download frontend build
       ansible.builtin.unarchive:
         src: https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
         dest: /usr/share/nginx/html
         remote_src: yes
 
-    - name: copy expense nginx config
+    - name: Copy expense nginx config
       ansible.builtin.copy:
         src: expense.conf
         dest: /etc/nginx/conf.d/expense.conf
+        owner: root
+        group: root
+        mode: '0644'
 
-    - name: remove default nginx config if exists
-      ansible.builtin.file:
-        path: /etc/nginx/sites-enabled/default
-        state: absent
-        force: yes
-        ignore_errors: yes
-
-    - name: test nginx config
+    - name: Test nginx config
       ansible.builtin.command: nginx -t
       register: nginx_test
-      failed_when: nginx_test.rc != 0
+      failed_when: "'successful' not in nginx_test.stderr"
       changed_when: false
 
-    - name: restart nginx
+    - name: Start and enable nginx
       ansible.builtin.service:
         name: nginx
-        state: restarted
+        state: started
+        enabled: yes
