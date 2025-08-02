@@ -1,5 +1,22 @@
+# 💸 Expense Application Deployment with Ansible
 
+This project shows how to deploy a **3-tier Expense Tracking Application** using **Ansible** across three different EC2 instances:
 
+- 🗃️ **MySQL Database Server**
+- ⚙️ **Node.js Backend Server**
+- 🌍 **Nginx Frontend Server**
+
+---
+
+## 📦 Tech Stack
+
+- OS: Ubuntu 22.04 (or Amazon Linux for Ansible)
+- Configuration Manager: **Ansible**
+- Database: **MySQL**
+- Backend: **Node.js** (Express.js)
+- Frontend: **Nginx** (static React build)
+
+---
 ---
 
 ## ✅ Prerequisites Checklist
