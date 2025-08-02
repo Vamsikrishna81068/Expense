@@ -46,6 +46,7 @@
         group: root
         mode: '0644'
 
+
     - name: Test nginx config
       ansible.builtin.command: nginx -t
       register: nginx_test
