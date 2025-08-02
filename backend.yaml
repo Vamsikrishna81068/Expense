@@ -12,18 +12,10 @@
           - nodejs
           - npm
           - unzip
-          - mysql-client
-          - python3-pip
-          - python3-venv
+          - python3-pymysql
+          - python3-cryptography
         state: present
         update_cache: yes
-
-    - name: Install Node.js 20 using Nodesource
-      ansible.builtin.shell: |
-        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-        apt-get install -y nodejs
-      args:
-        executable: /bin/bash
 
     - name: Create expense user
       ansible.builtin.user:
@@ -33,9 +25,6 @@
       ansible.builtin.file:
         path: /app
         state: directory
-        owner: expense
-        group: expense
-        mode: '0755'
 
     - name: Download backend code
       ansible.builtin.get_url:
@@ -57,19 +46,8 @@
       ansible.builtin.copy:
         src: backend.service
         dest: /etc/systemd/system/backend.service
-        owner: root
-        group: root
-        mode: '0644'
 
-    - name: Install PyMySQL and cryptography with --break-system-packages
-      ansible.builtin.pip:
-        name:
-          - PyMySQL
-          - cryptography
-        executable: pip3
-        extra_args: --break-system-packages
-
-    - name: Import data into MySQL
+    - name: Import data into mysql
       community.mysql.mysql_db:
         login_user: root
         login_password: "{{ login_password }}"
@@ -78,7 +56,7 @@
         state: import
         name: all
 
-    - name: Reload systemd
+    - name: Daemon reload
       ansible.builtin.systemd_service:
         daemon_reload: true
 
