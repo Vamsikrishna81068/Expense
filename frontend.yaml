@@ -39,10 +39,17 @@
     - name: Copy expense nginx config
       ansible.builtin.copy:
         src: expense.conf
-        dest: /etc/nginx/conf.d/expense.conf
+        dest: /etc/nginx/sites-available/expense.conf
         owner: root
         group: root
         mode: '0644'
+
+    - name: Enable expense site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/expense.conf
+        dest: /etc/nginx/sites-enabled/expense.conf
+        state: link
+        force: true
 
     - name: Test nginx config
       ansible.builtin.command: nginx -t
