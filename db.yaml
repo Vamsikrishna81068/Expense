@@ -6,7 +6,7 @@
     login_host: 172.31.89.171
   vars_prompt:
     - name: mysql_root_password
-      prompt: please enter MySQL root password
+      prompt: Please enter MySQL root password
       private: no
 
   tasks:
@@ -48,9 +48,13 @@
       ansible.builtin.debug:
         msg: "Output: {{ mysql_connection_output }}"
 
-    - name: Setup root password if not already set
+    - name: Set up root password and remote access if not already set
       ansible.builtin.command: >
-        mysql -uroot -e "ALTER USER 'root'@'{{ login_host }}' IDENTIFIED WITH mysql_native_password BY '{{ mysql_root_password }}';"
+        mysql -uroot -e "
+        ALTER USER 'root'@'172.31.89.171' IDENTIFIED WITH mysql_native_password BY '{{ mysql_root_password }}';
+        CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '{{ mysql_root_password }}';
+        GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+        FLUSH PRIVILEGES;"
       when: mysql_connection_output.failed is true
 
     - name: Ensure MySQL listens on all IP addresses
