@@ -30,6 +30,7 @@ This project explains **how to deploy a 3-tier Expense Tracking Application** us
 |   ├──expense.conf
 |
 └── README.md
+---
 ## ✅ Prerequisites Checklist
 
 Before running the playbooks, ensure the following:
@@ -45,7 +46,7 @@ Before running the playbooks, ensure the following:
 
 > 💡 Run `ansible --version` to confirm Ansible is installed.
 
-
+---
 ## ▶️ Running the Playbooks
 
 Run the following Ansible playbooks **in order**, from your Ansible control node:
