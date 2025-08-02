@@ -1,6 +1,7 @@
 - name: configure frontend server
   become: yes
-  hosts: db
+  hosts: frontend
+
   tasks:
     - name: install nginx server
       ansible.builtin.apt:
@@ -33,7 +34,18 @@
     - name: copy backend conf
       ansible.builtin.copy:
         src: expense.conf
-        dest: /etc/nginx/default.d/expense.conf
+        dest: /etc/nginx/sites-available/expense.conf
+
+    - name: enable expense site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/expense.conf
+        dest: /etc/nginx/sites-enabled/expense.conf
+        state: link
+
+    - name: remove default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
 
     - name: restart nginx
       ansible.builtin.service:
