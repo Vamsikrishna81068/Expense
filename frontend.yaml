@@ -31,22 +31,23 @@
         dest: /usr/share/nginx/html
         remote_src: yes
 
-    - name: copy backend conf
+    - name: copy expense nginx config
       ansible.builtin.copy:
-       src: expense.conf
-       dest: /etc/nginx/conf.d/expense.conf
+        src: expense.conf
+        dest: /etc/nginx/conf.d/expense.conf
 
-
-    - name: enable expense site
-      ansible.builtin.file:
-        src: /etc/nginx/sites-available/expense.conf
-        dest: /etc/nginx/sites-enabled/expense.conf
-        state: link
-
-    - name: remove default nginx site
+    - name: remove default nginx config if exists
       ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
+        force: yes
+        ignore_errors: yes
+
+    - name: test nginx config
+      ansible.builtin.command: nginx -t
+      register: nginx_test
+      failed_when: nginx_test.rc != 0
+      changed_when: false
 
     - name: restart nginx
       ansible.builtin.service:
