@@ -1,57 +1,55 @@
 # 💸 Expense Application Deployment with Ansible
 
-This project explains **how to deploy a 3-tier Expense Tracking Application** using **Ansible** across three different EC2 instances:
+This project shows how to deploy a **3-tier Expense Tracking Application** using **Ansible** across three different EC2 instances:
 
-- 🗃️ MySQL Database Server
-- ⚙️ Node.js Backend Server
-- 🌍 Nginx Frontend Server
+- 🗃️ **MySQL Database Server**
+- ⚙️ **Node.js Backend Server**
+- 🌍 **Nginx Frontend Server**
 
 ---
 
 ## 📦 Tech Stack
 
-- OS: Ubuntu
-- Ansible (installed on Control Node)
-- MySQL
-- Node.js + Express
-- Nginx (with reverse proxy)
+- OS: Ubuntu 22.04 (or Amazon Linux for Ansible)
+- Configuration Manager: **Ansible**
+- Database: **MySQL**
+- Backend: **Node.js** (Express.js)
+- Frontend: **Nginx** (static React build)
 
 ---
 
 ## 📁 Project Structure
 
-```bash
-├── ansible/
-│   ├── inventory.ini
-│   ├── db.yaml
-│   ├── backend.yaml
-│   ├── frontend.yaml
-│   └── backend.service
-|   ├──expense.conf
-|
-└── README.md
+
+
+---
 
 ## ✅ Prerequisites Checklist
 
 Before running the playbooks, ensure the following:
 
-- [ ] Your `inventory.ini` file contains the correct IP addresses of the target EC2 instances.
-- [ ] SSH access to each instance is set up correctly  
-  (e.g., SSH key is available or has been copied using `ssh-copy-id`).
-- [ ] All necessary files are present and in the correct paths:  
-  - `.service` file for backend environment variables  
-  - `expense.conf` for Nginx configuration
-- [ ] Ansible is installed and configured properly on your control node.
-- [ ] Internet access is available on the managed nodes for downloading packages and artifacts.
+- [ ] Your `inventory.ini` contains correct **private IP addresses** of all EC2 instances.
+- [ ] **SSH access** is working for each instance from your control node.
+- [ ] Files required for configuration are placed correctly:
+  - `backend.service` — for systemd backend service
+  - `expense.conf` — for Nginx reverse proxy
+- [ ] **Ansible** is installed on the control node.
+  > Run: `ansible --version`
+- [ ] EC2 instances have **internet access** to install packages and download files.
+- [ ] You have cloned or downloaded this repository to your Ansible control node.
 
-> 💡 Run `ansible --version` to confirm Ansible is installed.
-
-
-## ▶️ Running the Playbooks
-
-Run the following Ansible playbooks **in order**, from your Ansible control node:
 ---
+
+## ▶️ How to Run the Playbooks
+
+Run the following playbooks **in order** from your control node:
+
 ```bash
+# 1. Setup MySQL DB
 ansible-playbook -i inventory.ini db.yaml
+
+# 2. Setup Backend (Node.js + Express)
 ansible-playbook -i inventory.ini backend.yaml
+
+# 3. Setup Frontend (Nginx )
 ansible-playbook -i inventory.ini frontend.yaml
