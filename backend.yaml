@@ -12,10 +12,14 @@
           - nodejs
           - npm
           - unzip
-          - python3-pymysql
-          - python3-cryptography
+          - python3-pip
         state: present
         update_cache: yes
+
+    - name: Install PyMySQL and cryptography via pip
+      ansible.builtin.command:
+        cmd: pip3 install PyMySQL cryptography --break-system-packages
+      ignore_errors: true
 
     - name: Create expense user
       ansible.builtin.user:
@@ -25,6 +29,9 @@
       ansible.builtin.file:
         path: /app
         state: directory
+        owner: expense
+        group: expense
+        mode: '0755'
 
     - name: Download backend code
       ansible.builtin.get_url:
@@ -36,11 +43,15 @@
         src: /tmp/backend.zip
         dest: /app
         remote_src: yes
+        owner: expense
+        group: expense
 
     - name: Install npm dependencies
       ansible.builtin.command: npm install
       args:
         chdir: /app
+      environment:
+        HOME: /root
 
     - name: Copy backend service file
       ansible.builtin.copy:
