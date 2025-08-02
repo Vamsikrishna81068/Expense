@@ -16,7 +16,6 @@ This project shows how to deploy a **3-tier Expense Tracking Application** using
 - Backend: **Node.js** (Express.js)
 - Frontend: **Nginx** (static React build)
 
----
 
 ## 📁 Project Structure
 
@@ -30,9 +29,6 @@ This project shows how to deploy a **3-tier Expense Tracking Application** using
 │   └── expense.conf          # Nginx config for frontend routing
 │
 └── README.md                 # Project deployment documentation
-
-
-
 
 ---
 
