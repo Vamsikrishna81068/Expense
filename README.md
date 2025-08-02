@@ -28,8 +28,8 @@ This project shows how to deploy a **3-tier Expense Tracking Application** using
 
 Before running the playbooks, ensure the following:
 
-- [ ] Your `inventory.ini` contains correct **private IP addresses** of all EC2 instances.
-- [ ] **SSH access** is working for each instance from your control node.
+- Your `inventory.ini` contains correct **private IP addresses** of all EC2 instances.
+- **SSH access** is working for each instance from your control node.
 - [ ] Files required for configuration are placed correctly:
   - `backend.service` — for systemd backend service
   - `expense.conf` — for Nginx reverse proxy
