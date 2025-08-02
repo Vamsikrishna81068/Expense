@@ -33,8 +33,9 @@
 
     - name: copy backend conf
       ansible.builtin.copy:
-        src: expense.conf
-        dest: /etc/nginx/sites-available/expense.conf
+       src: expense.conf
+       dest: /etc/nginx/conf.d/expense.conf
+
 
     - name: enable expense site
       ansible.builtin.file:
