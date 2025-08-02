@@ -1,0 +1,88 @@
+- name: Configure backend server
+  become: yes
+  hosts: db
+  vars:
+    login_host: 172.31.89.171
+    login_password: ExpenseApp@1
+
+  tasks:
+    - name: Ensure required APT packages are present
+      ansible.builtin.apt:
+        name:
+          - nodejs
+          - npm
+          - unzip
+          - mysql-client
+          - python3-pip
+          - python3-venv
+        state: present
+        update_cache: yes
+
+    - name: Install Node.js 20 using Nodesource
+      ansible.builtin.shell: |
+        curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+        apt-get install -y nodejs
+      args:
+        executable: /bin/bash
+
+    - name: Create expense user
+      ansible.builtin.user:
+        name: expense
+
+    - name: Create app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+        owner: expense
+        group: expense
+        mode: '0755'
+
+    - name: Download backend code
+      ansible.builtin.get_url:
+        url: https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+        dest: /tmp/backend.zip
+
+    - name: Unzip backend code
+      ansible.builtin.unarchive:
+        src: /tmp/backend.zip
+        dest: /app
+        remote_src: yes
+
+    - name: Install npm dependencies
+      ansible.builtin.command: npm install
+      args:
+        chdir: /app
+
+    - name: Copy backend service file
+      ansible.builtin.copy:
+        src: backend.service
+        dest: /etc/systemd/system/backend.service
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Python MySQL dependencies
+      ansible.builtin.pip:
+        name:
+          - PyMySQL
+          - cryptography
+        executable: pip3
+
+    - name: Import data into MySQL
+      community.mysql.mysql_db:
+        login_user: root
+        login_password: "{{ login_password }}"
+        login_host: "{{ login_host }}"
+        target: /app/schema/backend.sql
+        state: import
+        name: all
+
+    - name: Reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+
+    - name: Start and enable backend service
+      ansible.builtin.service:
+        name: backend
+        state: started
+        enabled: yes
