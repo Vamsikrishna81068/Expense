@@ -61,12 +61,13 @@
         group: root
         mode: '0644'
 
-    - name: Install Python MySQL dependencies
+    - name: Install PyMySQL and cryptography with --break-system-packages
       ansible.builtin.pip:
         name:
           - PyMySQL
           - cryptography
         executable: pip3
+        extra_args: --break-system-packages
 
     - name: Import data into MySQL
       community.mysql.mysql_db:
