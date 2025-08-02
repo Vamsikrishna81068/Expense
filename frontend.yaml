@@ -3,7 +3,6 @@
   become: yes
 
   tasks:
-
     - name: Install nginx
       ansible.builtin.apt:
         name: nginx
@@ -20,7 +19,6 @@
       ansible.builtin.file:
         path: /etc/nginx/sites-enabled/default
         state: absent
-        force: yes
 
     - name: Remove default html
       ansible.builtin.file:
@@ -40,17 +38,16 @@
 
     - name: Copy expense nginx config
       ansible.builtin.copy:
-        src: expense.conf
+        src: files/expense.conf
         dest: /etc/nginx/conf.d/expense.conf
         owner: root
         group: root
         mode: '0644'
 
-
     - name: Test nginx config
       ansible.builtin.command: nginx -t
       register: nginx_test
-      failed_when: "'successful' not in nginx_test.stderr"
+      failed_when: nginx_test.rc != 0
       changed_when: false
 
     - name: Start and enable nginx
@@ -58,5 +55,3 @@
         name: nginx
         state: started
         enabled: yes
-    
-
