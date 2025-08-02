@@ -3,7 +3,7 @@
   hosts: db
   become: yes
   vars:
-    login_host: 172.31.89.171
+    login_host: <DB_INSTANCE_IP> #(replace with actual DB instance private IP)
   vars_prompt:
     - name: mysql_root_password
       prompt: Please enter MySQL root password

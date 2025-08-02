@@ -1,5 +1,5 @@
 - name: configure frontend server
-  hosts: db
+  hosts: frontend
   become: yes
 
   tasks:
