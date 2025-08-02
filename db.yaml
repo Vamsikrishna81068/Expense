@@ -1,52 +1,67 @@
 ---
-- name: configure DB server
+- name: Configure DB server
   hosts: db
   become: yes
   vars:
     login_host: 172.31.89.171
   vars_prompt:
-  - name: mysql_root_password
-    prompt: please enter MySQL root password
-    private: no
+    - name: mysql_root_password
+      prompt: please enter MySQL root password
+      private: no
+
   tasks:
-  - name: Install MySQL server
-    ansible.builtin.apt:
-      name: mysql-server
-      state: present
-      update_cache: yes
-  - name: Start and Enable MySQL server
-    ansible.builtin.service:
-      name: mysql
-      state: started
-      enabled: yes
-  - name: Install python3-pip
-    ansible.builtin.apt:
-     name: python3-pip
-     state: present
-    
-  - name: Install PyMySQL and cryptography with --break-system-packages
-    ansible.builtin.pip:
-     name:
-      - PyMySQL
-      - cryptography
-     executable: pip3
-     extra_args: --break-system-packages
+    - name: Install MySQL server
+      ansible.builtin.apt:
+        name: mysql-server
+        state: present
+        update_cache: yes
 
-  # check password is already setup or not
-  - name: check DB connection
-    community.mysql.mysql_info:
-      login_user: root
-      login_password: "{{ mysql_root_password }}"
-      login_host: "{{ login_host }}"
-      filter: version
-    ignore_errors: yes
-    register: mysql_connection_output
+    - name: Start and Enable MySQL server
+      ansible.builtin.service:
+        name: mysql
+        state: started
+        enabled: yes
 
-  - name: print output
-    ansible.builtin.debug:
-      msg: "Output: {{mysql_connection_output}} "
+    - name: Install python3-pip
+      ansible.builtin.apt:
+        name: python3-pip
+        state: present
 
-  - name: setup root password
-    ansible.builtin.command: >
-        mysql -uroot -e "ALTER USER 'root'@'172.31.89.171' IDENTIFIED WITH mysql_native_password BY '{{ mysql_root_password }}';"
-    when: mysql_connection_output.failed is true # don't give {{ }} in when condition
+    - name: Install PyMySQL and cryptography with --break-system-packages
+      ansible.builtin.pip:
+        name:
+          - PyMySQL
+          - cryptography
+        executable: pip3
+        extra_args: --break-system-packages
+
+    - name: Check DB connection
+      community.mysql.mysql_info:
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        login_host: "{{ login_host }}"
+        filter: version
+      ignore_errors: yes
+      register: mysql_connection_output
+
+    - name: Print output
+      ansible.builtin.debug:
+        msg: "Output: {{ mysql_connection_output }}"
+
+    - name: Setup root password if not already set
+      ansible.builtin.command: >
+        mysql -uroot -e "ALTER USER 'root'@'{{ login_host }}' IDENTIFIED WITH mysql_native_password BY '{{ mysql_root_password }}';"
+      when: mysql_connection_output.failed is true
+
+    - name: Ensure MySQL listens on all IP addresses
+      ansible.builtin.lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+        insertafter: '[mysqld]'
+        create: yes
+
+    - name: Restart MySQL after config update
+      ansible.builtin.service:
+        name: mysql
+        state: restarted
