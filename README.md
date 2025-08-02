@@ -30,7 +30,7 @@ This project shows how to deploy a **3-tier Expense Tracking Application** using
 │
 └── README.md                 # Project deployment documentation
 
----
+
 
 ## ✅ Prerequisites Checklist
 
